@@ -20,7 +20,8 @@
     nav {
       display: flex; justify-content: space-between; align-items: center;
       padding: 20px 30px; background: rgba(0,0,0,0.6);
-      position: sticky; top: 0; z-index: 1000;
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 1000;
       animation: fadeDown 1s ease-in;
     }
     nav .left { font-size: 1.3rem; font-weight: bold; color: #a066ff; }
@@ -44,7 +45,7 @@
     /* Hero Section */
     .hero {
       display: flex; justify-content: space-around; align-items: center;
-      padding: 80px 30px; min-height: 100vh;
+      padding: 120px 30px 80px; min-height: 100vh;
       animation: fadeIn 1.5s ease-in;
     }
     .hero-text { max-width: 600px; }
@@ -52,17 +53,17 @@
     .hero-text h2 { font-size: 1.6rem; margin: 10px 0; color: #a066ff; }
     .hero-text p { margin: 20px 0; font-size: 1rem; color: #ddd; opacity: 0; animation: fadeUp 1s ease forwards; animation-delay: 0.5s; }
     .stats p { margin: 5px 0; font-size: 0.9rem; color: #a066ff; font-weight: 500; }
-    .hero-buttons { margin: 20px 0; }
+    .hero-buttons { margin: 20px 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
     .btn {
       background: #a066ff; color: white; padding: 10px 18px;
-      margin: 5px; border-radius: 5px; text-decoration: none; font-weight: bold;
+      border-radius: 5px; text-decoration: none; font-weight: bold;
       transition: 0.4s; display: inline-block;
       box-shadow: 0px 0px 10px rgba(160,102,255,0.4);
     }
     .btn:hover { background: #843bdb; transform: translateY(-2px) scale(1.05); }
-    .socials { margin-top: 15px; }
+    .socials { margin-top: 15px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
     .socials a {
-      margin: 0 10px; color: #a066ff; text-decoration: none;
+      color: #a066ff; text-decoration: none;
       padding: 8px 14px; border-radius: 6px; border: 1px solid #a066ff;
       transition: 0.4s;
     }
@@ -81,7 +82,7 @@
     section { padding: 60px 30px; text-align: center; animation: fadeUp 1.2s ease-in; }
     section h1 { font-size: 1.8rem; margin-bottom: 30px; color: #a066ff; }
 
-    /* Skills/Services */
+    /* Services */
     .services {
       display: grid; grid-template-columns: repeat(auto-fit,minmax(230px,1fr));
       gap: 20px;
@@ -233,11 +234,10 @@
         <a href="https://github.com/Dhanraj4102/Joblisting" class="btn">View Code</a>
       </div>
       <div class="project-card" style="animation-delay:0.6s;">
-  <h3>📚 Student Webform</h3>
-  <p>ASP.NET Web Forms project to manage student records with MySQL integration. Supports insert, edit, update, and delete operations.</p>
-  <a href="https://github.com/Dhanraj4102/Student_Webform" class="btn">View Code</a>
-</div>
-
+        <h3>📚 Student Webform</h3>
+        <p>ASP.NET Web Forms project to manage student records with MySQL integration. Supports insert, edit, update, and delete operations.</p>
+        <a href="https://github.com/Dhanraj4102/Student_Webform" class="btn">View Code</a>
+      </div>
     </div>
   </section>
 
@@ -269,12 +269,14 @@
       </div>
     </div>
 
-    <form class="contact-form" action="https://formspree.io/f/xrbawene" method="POST">
+    <form class="contact-form" id="contact-form">
   <input type="text" name="name" placeholder="Your Name" required>
   <input type="email" name="email" placeholder="Your Email" required>
   <textarea name="message" placeholder="Your Message" rows="4" required></textarea>
   <button type="submit">Send Message</button>
+  <p id="form-status" style="margin-top:10px; font-size:0.9rem;"></p>
 </form>
+
 
   </section>
 
@@ -284,16 +286,58 @@
   </footer>
 
   <!-- Typed.js + JS -->
-  <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
-  <script>
-    var typed = new Typed('#element', {
-      strings: ['Full-Stack Developer', 'Freelancer', 'Software Engineer'],
-      typeSpeed: 60, backSpeed: 40, loop: true
-    });
+<script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
+<script>
+  // Typed.js animation
+  var typed = new Typed('#element', {
+    strings: ['Full-Stack Developer', 'Freelancer', 'Software Engineer'],
+    typeSpeed: 60,
+    backSpeed: 40,
+    loop: true
+  });
 
-    function toggleMenu() {
-      document.getElementById("menu").classList.toggle("show");
+  // Mobile menu toggle
+  function toggleMenu() {
+    document.getElementById("menu").classList.toggle("show");
+  }
+
+  // Close menu when clicking outside
+  document.addEventListener("click", function (e) {
+    const menu = document.getElementById("menu");
+    const toggle = document.querySelector(".menu-toggle");
+    if (!menu.contains(e.target) && !toggle.contains(e.target)) {
+      menu.classList.remove("show");
     }
-  </script>
+  });
+
+  // ✅ Formspree AJAX handling
+  const form = document.getElementById("contact-form");
+  const status = document.getElementById("form-status");
+
+  form.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const data = new FormData(form);
+
+    try {
+      let response = await fetch("https://formspree.io/f/xrbawene", {
+        method: "POST",
+        body: data,
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (response.ok) {
+        status.style.color = "lightgreen";
+        status.textContent = "✅ Your message has been sent successfully!";
+        form.reset();
+      } else {
+        status.style.color = "red";
+        status.textContent = "⚠️ Oops! Something went wrong. Please try again.";
+      }
+    } catch (error) {
+      status.style.color = "red";
+      status.textContent = "⚠️ Network error. Please try again later.";
+    }
+  });
+</script>
 </body>
 </html>
